@@ -729,12 +729,14 @@ const all=document.createElement('button');all.textContent='Вся кварти�
 M.rooms.forEach(r=>{const b=document.createElement('button');b.textContent=r.name;b.onclick=()=>viewRoom(r,b);rooms.appendChild(b);
   const d=document.createElement('div');d.className='t';d.innerHTML=r.name+'<span>'+AREA[r.name]+'</span>';d.onclick=()=>viewRoom(r,b);lbl.appendChild(d);
   L.push([d,new THREE.Vector3(r.x+r.w/2,1.3,r.y+r.d/2)]);});
-function resize(){const w=app.clientWidth,h=app.clientHeight;renderer.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();}
+function home()home();
+function resize(){const w=app.clientWidth||innerWidth,h=app.clientHeight||innerHeight;if(!w||!h)return;renderer.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();if(!isFinite(cam.position.x))home();}
 addEventListener('resize',resize);resize();
-{const D=fitDist(),dir=new THREE.Vector3(-.4,.78,.48).normalize();cam.position.set(cx+dir.x*D,dir.y*D,cz+dir.z*D);ctl.target.set(cx,0,cz);ctl.update();}
+home();
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches, v=new THREE.Vector3();
 (function loop(){requestAnimationFrame(loop);
   if(fly){fly.k=Math.min(1,fly.k+(reduce?1:.045));const e=1-Math.pow(1-fly.k,3);cam.position.lerpVectors(fly.p0,fly.p1,e);ctl.target.lerpVectors(fly.t0,fly.t1,e);if(fly.k>=1)fly=null;}
+  if(!isFinite(cam.position.x)){resize();home();}
   ctl.update();renderer.render(scene,cam);
   const w=app.clientWidth,h=app.clientHeight;
   L.forEach(([d,p])=>{v.copy(p).project(cam);const vis=v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;d.hidden=!vis;d.style.left=((v.x+1)/2*w)+'px';d.style.top=((1-v.y)/2*h)+'px';});
