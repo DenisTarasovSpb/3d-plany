@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Квартира 163 в 3D</title>
+<style>
+:root{--ground:#e9ecf1;--panel:#ffffff;--ink:#1c2230;--muted:#5f6878;--accent:#1f4fd1;--accent-ink:#ffffff;--chip:#f3f5f9;--shadow:0 1px 3px rgba(20,30,60,.16)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ground:#161a22;--panel:#222834;--ink:#e8ebf2;--muted:#a3abbb;--accent:#6f95ff;--accent-ink:#0d1220;--chip:#2b3240;--shadow:0 1px 3px rgba(0,0,0,.5);color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#161a22;--panel:#222834;--ink:#e8ebf2;--muted:#a3abbb;--accent:#6f95ff;--accent-ink:#0d1220;--chip:#2b3240;--shadow:0 1px 3px rgba(0,0,0,.5);color-scheme:dark}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:var(--ground);color:var(--ink);font:14px/1.35 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+#app{position:relative;height:100%}
+canvas{display:block;touch-action:none}
+.bar{position:absolute;left:16px;right:16px;display:flex;gap:8px;align-items:center;pointer-events:none}
+.bar>*{pointer-events:auto}
+#top{top:12px;flex-wrap:wrap}
+#rooms{bottom:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+#rooms::-webkit-scrollbar{display:none}
+h1{margin:0;font-size:16px;font-weight:700;background:var(--panel);padding:8px 12px;border-radius:10px;box-shadow:var(--shadow)}
+button{font:inherit;border:0;border-radius:999px;padding:8px 14px;background:var(--panel);color:var(--ink);box-shadow:var(--shadow);cursor:pointer;white-space:nowrap}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.on{background:var(--accent);color:var(--accent-ink)}
+#rooms button{background:var(--chip)}
+#rooms button.on{background:var(--accent);color:var(--accent-ink)}
+#hint{position:absolute;left:16px;right:16px;bottom:62px;font-size:12px;color:var(--muted);pointer-events:none;text-shadow:0 0 6px var(--ground)}
+#lbl .t{position:absolute;transform:translate(-50%,-50%);font-weight:700;font-size:12px;color:var(--accent);background:var(--panel);padding:3px 8px;border-radius:7px;box-shadow:var(--shadow);white-space:nowrap;cursor:pointer;opacity:.94}
+#lbl .t span{display:block;font-weight:400;font-size:11px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+</style>
+</head><body>
+
+<div id="app">
+<div id="lbl"></div>
+<div class="bar" id="top"><h1>Кв. 163</h1><button id="b3d" class="on">3D</button><button id="btop">Сверху</button><button id="bwall">Стены ниже</button><button id="blab" class="on">Подписи</button></div>
+<div id="hint">Вращать — один палец или мышь · приблизить — два пальца или колесо · нажмите на комнату, чтобы рассмотреть её. Схема по плану (±10 см), двери условно, скаты мансарды не показаны.</div>
+<div class="bar" id="rooms"></div>
+</div>
+<script src="lib/three.min.js"></script>
+<script src="lib/OrbitControls.js"></script>
+<script>
+const M={
+ "rooms": [
+  {
+   "id": "terrace",
+   "type": "deck",
+   "name": "Терраса",
+   "x": 4.286,
+   "y": 0.0,
+   "w": 1.886,
+   "d": 5.096
+  },
+  {
+   "id": "big",
+   "type": "wood",
+   "name": "Гостиная",
+   "x": 1.771,
+   "y": 5.73,
+   "w": 6.2,
+   "d": 2.837
+  },
+  {
+   "id": "room1",
+   "type": "wood",
+   "name": "Спальня",
+   "x": 0.429,
+   "y": 8.788,
+   "w": 4.286,
+   "d": 2.617
+  },
+  {
+   "id": "room2",
+   "type": "wood",
+   "name": "Детская",
+   "x": 0.429,
+   "y": 11.57,
+   "w": 4.257,
+   "d": 2.314
+  },
+  {
+   "id": "corr",
+   "type": "wood",
+   "name": "Коридор",
+   "x": 4.857,
+   "y": 8.815,
+   "w": 1.229,
+   "d": 5.069
+  },
+  {
+   "id": "bath",
+   "type": "tile",
+   "name": "Ванная",
+   "x": 6.229,
+   "y": 8.815,
+   "w": 1.743,
+   "d": 3.058
+  },
+  {
+   "id": "small",
+   "type": "wood",
+   "name": "Гардероб",
+   "x": 6.229,
+   "y": 12.039,
+   "w": 1.686,
+   "d": 1.818
+  },
+  {
+   "id": "living",
+   "type": "wood",
+   "name": "Столовая",
+   "x": 0.0,
+   "y": 14.132,
+   "w": 4.314,
+   "d": 3.14
+  },
+  {
+   "id": "kitchen",
+   "type": "tile",
+   "name": "Кухня",
+   "x": 0.429,
+   "y": 17.438,
+   "w": 3.886,
+   "d": 2.782
+  },
+  {
+   "id": "hall",
+   "type": "wood",
+   "name": "Прихожая",
+   "x": 4.486,
+   "y": 14.132,
+   "w": 1.571,
+   "d": 4.353
+  },
+  {
+   "id": "shower",
+   "type": "tile",
+   "name": "Душ + WC",
+   "x": 4.486,
+   "y": 18.595,
+   "w": 1.571,
+   "d": 1.653
+  },
+  {
+   "id": "loggia",
+   "type": "deck",
+   "name": "Лоджия",
+   "x": -2.4,
+   "y": 13.664,
+   "w": 1.943,
+   "d": 4.077
+  }
+ ],
+ "doors": [
+  {
+   "x0": 4.914,
+   "y0": 8.375,
+   "x1": 5.914,
+   "y1": 9.063,
+   "open": 0,
+   "name": "big-corr"
+  },
+  {
+   "x0": 4.486,
+   "y0": 10.441,
+   "x1": 5.057,
+   "y1": 11.185,
+   "open": 0,
+   "name": "corr-room1"
+  },
+  {
+   "x0": 4.486,
+   "y0": 12.92,
+   "x1": 5.057,
+   "y1": 13.691,
+   "open": 0,
+   "name": "corr-room2"
+  },
+  {
+   "x0": 5.914,
+   "y0": 10.716,
+   "x1": 6.429,
+   "y1": 11.488,
+   "open": 0,
+   "name": "corr-bath"
+  },
+  {
+   "x0": 5.914,
+   "y0": 12.507,
+   "x1": 6.429,
+   "y1": 13.278,
+   "open": 0,
+   "name": "corr-small"
+  },
+  {
+   "x0": 4.829,
+   "y0": 13.691,
+   "x1": 6.057,
+   "y1": 14.298,
+   "open": 1,
+   "name": "corr-hall"
+  },
+  {
+   "x0": 4.143,
+   "y0": 14.573,
+   "x1": 4.714,
+   "y1": 15.399,
+   "open": 0,
+   "name": "hall-living"
+  },
+  {
+   "x0": 5.857,
+   "y0": 17.466,
+   "x1": 6.343,
+   "y1": 18.347,
+   "open": 0,
+   "name": "ВХОД"
+  },
+  {
+   "x0": 4.714,
+   "y0": 18.32,
+   "x1": 5.543,
+   "y1": 18.76,
+   "open": 0,
+   "name": "hall-shower"
+  },
+  {
+   "x0": 0.771,
+   "y0": 17.107,
+   "x1": 2.343,
+   "y1": 17.603,
+   "open": 1,
+   "name": "living-kitchen"
+  },
+  {
+   "x0": 4.829,
+   "y0": 4.931,
+   "x1": 5.629,
+   "y1": 5.895,
+   "open": 0,
+   "name": "big-terrace"
+  },
+  {
+   "x0": -0.657,
+   "y0": 15.124,
+   "x1": 0.2,
+   "y1": 15.895,
+   "open": 0,
+   "name": "living-loggia"
+  }
+ ],
+ "furn": [
+  {
+   "room": "big",
+   "x": 2.171,
+   "y": 7.57,
+   "w": 2.3,
+   "d": 0.95,
+   "h": 0.8,
+   "c": "#7a8ca3",
+   "label": "Диван 230×95",
+   "kind": "sofa_up"
+  },
+  {
+   "room": "big",
+   "x": 2.771,
+   "y": 6.68,
+   "w": 1.1,
+   "d": 0.6,
+   "h": 0.42,
+   "c": "#b08a5e",
+   "label": "Столик",
+   "kind": ""
+  },
+  {
+   "room": "big",
+   "x": 2.271,
+   "y": 5.73,
+   "w": 2.0,
+   "d": 0.4,
+   "h": 0.55,
+   "c": "#5b4a3a",
+   "label": "ТВ-тумба",
+   "kind": ""
+  },
+  {
+   "room": "big",
+   "x": 6.871,
+   "y": 5.98,
+   "w": 0.85,
+   "d": 0.85,
+   "h": 0.8,
+   "c": "#8c6f5a",
+   "label": "Кресло",
+   "kind": ""
+  },
+  {
+   "room": "big",
+   "x": 7.571,
+   "y": 6.73,
+   "w": 0.4,
+   "d": 1.6,
+   "h": 1.8,
+   "c": "#c9b79c",
+   "label": "Стеллаж",
+   "kind": ""
+  },
+  {
+   "room": "room1",
+   "x": 0.429,
+   "y": 9.288,
+   "w": 2.0,
+   "d": 1.6,
+   "h": 0.5,
+   "c": "#d9d2c5",
+   "label": "Кровать 160×200",
+   "kind": "bed_left"
+  },
+  {
+   "room": "room1",
+   "x": 0.429,
+   "y": 8.838,
+   "w": 0.4,
+   "d": 0.4,
+   "h": 0.5,
+   "c": "#8c6f5a",
+   "label": "Тумба",
+   "kind": ""
+  },
+  {
+   "room": "room1",
+   "x": 0.429,
+   "y": 10.938,
+   "w": 0.4,
+   "d": 0.4,
+   "h": 0.5,
+   "c": "#8c6f5a",
+   "label": "Тумба",
+   "kind": ""
+  },
+  {
+   "room": "room1",
+   "x": 4.119,
+   "y": 8.788,
+   "w": 0.6,
+   "d": 1.5,
+   "h": 2.2,
+   "c": "#c9b79c",
+   "label": "Шкаф",
+   "kind": ""
+  },
+  {
+   "room": "room2",
+   "x": 0.429,
+   "y": 11.57,
+   "w": 2.0,
+   "d": 0.9,
+   "h": 0.45,
+   "c": "#e3c9a8",
+   "label": "Кровать 90×200",
+   "kind": "bed_left"
+  },
+  {
+   "room": "room2",
+   "x": 0.629,
+   "y": 13.28,
+   "w": 1.2,
+   "d": 0.6,
+   "h": 0.75,
+   "c": "#b08a5e",
+   "label": "Стол",
+   "kind": ""
+  },
+  {
+   "room": "room2",
+   "x": 1.029,
+   "y": 12.77,
+   "w": 0.45,
+   "d": 0.45,
+   "h": 0.45,
+   "c": "#7a8ca3",
+   "label": "Стул",
+   "kind": ""
+  },
+  {
+   "room": "room2",
+   "x": 4.089,
+   "y": 11.57,
+   "w": 0.6,
+   "d": 1.2,
+   "h": 2.2,
+   "c": "#c9b79c",
+   "label": "Шкаф",
+   "kind": ""
+  },
+  {
+   "room": "living",
+   "x": 0.6,
+   "y": 14.132,
+   "w": 2.0,
+   "d": 0.9,
+   "h": 0.8,
+   "c": "#7a8ca3",
+   "label": "Диван 200×90",
+   "kind": "sofa_down"
+  },
+  {
+   "room": "living",
+   "x": 0.6,
+   "y": 15.682,
+   "w": 1.4,
+   "d": 0.85,
+   "h": 0.75,
+   "c": "#b08a5e",
+   "label": "Стол 140×85",
+   "kind": ""
+  },
+  {
+   "room": "living",
+   "x": 0.75,
+   "y": 15.232,
+   "w": 0.45,
+   "d": 0.42,
+   "h": 0.45,
+   "c": "#8c6f5a",
+   "label": "",
+   "kind": ""
+  },
+  {
+   "room": "living",
+   "x": 1.4,
+   "y": 15.232,
+   "w": 0.45,
+   "d": 0.42,
+   "h": 0.45,
+   "c": "#8c6f5a",
+   "label": "",
+   "kind": ""
+  },
+  {
+   "room": "living",
+   "x": 0.75,
+   "y": 16.562,
+   "w": 0.45,
+   "d": 0.42,
+   "h": 0.45,
+   "c": "#8c6f5a",
+   "label": "",
+   "kind": ""
+  },
+  {
+   "room": "living",
+   "x": 1.4,
+   "y": 16.562,
+   "w": 0.45,
+   "d": 0.42,
+   "h": 0.45,
+   "c": "#8c6f5a",
+   "label": "",
+   "kind": ""
+  },
+  {
+   "room": "kitchen",
+   "x": 0.429,
+   "y": 19.618,
+   "w": 3.29,
+   "d": 0.6,
+   "h": 0.9,
+   "c": "#e8e4dc",
+   "label": "Кухня",
+   "kind": ""
+  },
+  {
+   "room": "kitchen",
+   "x": 3.719,
+   "y": 18.238,
+   "w": 0.6,
+   "d": 1.98,
+   "h": 0.9,
+   "c": "#e8e4dc",
+   "label": "",
+   "kind": ""
+  },
+  {
+   "room": "kitchen",
+   "x": 3.719,
+   "y": 17.488,
+   "w": 0.6,
+   "d": 0.65,
+   "h": 1.9,
+   "c": "#dfe6ea",
+   "label": "Холодильник",
+   "kind": ""
+  },
+  {
+   "room": "hall",
+   "x": 4.486,
+   "y": 15.632,
+   "w": 0.6,
+   "d": 1.8,
+   "h": 2.2,
+   "c": "#c9b79c",
+   "label": "Шкаф",
+   "kind": ""
+  },
+  {
+   "room": "hall",
+   "x": 4.486,
+   "y": 17.532,
+   "w": 0.4,
+   "d": 0.8,
+   "h": 0.45,
+   "c": "#8c6f5a",
+   "label": "Банкетка",
+   "kind": ""
+  },
+  {
+   "room": "bath",
+   "x": 7.269,
+   "y": 8.815,
+   "w": 0.7,
+   "d": 1.7,
+   "h": 0.55,
+   "c": "#f4f7f9",
+   "label": "Ванна",
+   "kind": ""
+  },
+  {
+   "room": "bath",
+   "x": 6.279,
+   "y": 8.915,
+   "w": 0.4,
+   "d": 0.65,
+   "h": 0.45,
+   "c": "#f4f7f9",
+   "label": "WC",
+   "kind": ""
+  },
+  {
+   "room": "bath",
+   "x": 6.729,
+   "y": 11.425,
+   "w": 0.6,
+   "d": 0.45,
+   "h": 0.85,
+   "c": "#f4f7f9",
+   "label": "Раковина",
+   "kind": ""
+  },
+  {
+   "room": "bath",
+   "x": 7.369,
+   "y": 11.275,
+   "w": 0.6,
+   "d": 0.6,
+   "h": 0.85,
+   "c": "#dfe6ea",
+   "label": "Стир.",
+   "kind": ""
+  },
+  {
+   "room": "small",
+   "x": 7.419,
+   "y": 12.039,
+   "w": 0.5,
+   "d": 1.82,
+   "h": 2.2,
+   "c": "#c9b79c",
+   "label": "",
+   "kind": ""
+  },
+  {
+   "room": "small",
+   "x": 6.229,
+   "y": 12.039,
+   "w": 1.19,
+   "d": 0.5,
+   "h": 2.2,
+   "c": "#c9b79c",
+   "label": "Полки",
+   "kind": ""
+  },
+  {
+   "room": "shower",
+   "x": 5.156,
+   "y": 19.345,
+   "w": 0.9,
+   "d": 0.9,
+   "h": 0.1,
+   "c": "#dfe6ea",
+   "label": "Душ",
+   "kind": ""
+  },
+  {
+   "room": "shower",
+   "x": 4.586,
+   "y": 19.595,
+   "w": 0.4,
+   "d": 0.62,
+   "h": 0.45,
+   "c": "#f4f7f9",
+   "label": "WC",
+   "kind": ""
+  },
+  {
+   "room": "loggia",
+   "x": -1.9,
+   "y": 15.064,
+   "w": 0.6,
+   "d": 0.6,
+   "h": 0.7,
+   "c": "#b08a5e",
+   "label": "Столик",
+   "kind": ""
+  },
+  {
+   "room": "loggia",
+   "x": -1.9,
+   "y": 14.464,
+   "w": 0.5,
+   "d": 0.5,
+   "h": 0.45,
+   "c": "#8c6f5a",
+   "label": "",
+   "kind": ""
+  },
+  {
+   "room": "loggia",
+   "x": -1.9,
+   "y": 15.764,
+   "w": 0.5,
+   "d": 0.5,
+   "h": 0.45,
+   "c": "#8c6f5a",
+   "label": "",
+   "kind": ""
+  },
+  {
+   "room": "terrace",
+   "x": 4.886,
+   "y": 1.2,
+   "w": 0.7,
+   "d": 0.7,
+   "h": 0.7,
+   "c": "#b08a5e",
+   "label": "Столик",
+   "kind": ""
+  },
+  {
+   "room": "terrace",
+   "x": 4.886,
+   "y": 0.5,
+   "w": 0.55,
+   "d": 0.55,
+   "h": 0.45,
+   "c": "#8c6f5a",
+   "label": "",
+   "kind": ""
+  },
+  {
+   "room": "terrace",
+   "x": 4.886,
+   "y": 2.0,
+   "w": 0.55,
+   "d": 0.55,
+   "h": 0.45,
+   "c": "#8c6f5a",
+   "label": "",
+   "kind": ""
+  }
+ ],
+ "px": {
+  "SX": 35.0,
+  "SY": 36.3,
+  "OX": 93,
+  "OY": 91
+ }
+};
+const AREA={'Гостиная':'≈17–19 м²','Спальня':'≈10–11 м²','Детская':'≈9.4–10.5 м²','Коридор':'≈6.4 м²','Ванная':'≈5.0–5.4 м²','Гардероб':'≈3.3 м²','Столовая':'≈13.6–16.3 м²','Кухня':'≈8–14 м²','Прихожая':'≈7.1 м²','Душ + WC':'≈2.7 м²','Лоджия':'≈7.8 м²','Терраса':'≈8.9 м²'};
+const H=2.6,T=0.14, app=document.getElementById('app');
+const scene=new THREE.Scene();
+function paintBg(){scene.background=new THREE.Color(getComputedStyle(document.body).backgroundColor);}
+paintBg(); matchMedia('(prefers-color-scheme: dark)').addEventListener('change',paintBg);
+new MutationObserver(paintBg).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap; app.prepend(renderer.domElement);
+const cam=new THREE.PerspectiveCamera(45,1,0.05,300);
+const ctl=new THREE.OrbitControls(cam,renderer.domElement); ctl.enableDamping=true; ctl.maxPolarAngle=Math.PI*0.47; ctl.minDistance=2; ctl.maxDistance=60;
+scene.add(new THREE.HemisphereLight(0xffffff,0xb9b3a8,0.78));
+const sun=new THREE.DirectionalLight(0xffffff,0.62); sun.position.set(-8,18,-6); sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048); Object.assign(sun.shadow.camera,{left:-15,right:15,top:15,bottom:-15}); scene.add(sun);
+let minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9;
+M.rooms.forEach(r=>{minx=Math.min(minx,r.x);maxx=Math.max(maxx,r.x+r.w);miny=Math.min(miny,r.y);maxy=Math.max(maxy,r.y+r.d)});
+const cx=(minx+maxx)/2,cz=(miny+maxy)/2; sun.target.position.set(cx,0,cz); scene.add(sun.target);
+const FL={wood:0xd9c4a0,tile:0xd5dde3,deck:0xb8aa94};
+function box(x0,z0,x1,z1,y0,y1,color,o={}){const g=new THREE.BoxGeometry(Math.max(x1-x0,.001),Math.max(y1-y0,.001),Math.max(z1-z0,.001));
+  const mesh=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color,roughness:o.r??.85}));
+  mesh.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2); mesh.castShadow=!o.ns; mesh.receiveShadow=true; scene.add(mesh); return mesh;}
+M.rooms.forEach(r=>box(r.x,r.y,r.x+r.w,r.y+r.d,-.05,0,FL[r.type],{ns:1}));
+M.doors.forEach(d=>box(d.x0,d.y0,d.x1,d.y1,-.06,-.005,0xcdbb98,{ns:1}));
+const walls=[];
+function cut(a0,a1,ax,c0,c1){let segs=[[a0,a1]],lint=[];
+  M.doors.forEach(d=>{const [p0,p1,q0,q1]=ax==='x'?[d.x0,d.x1,d.y0,d.y1]:[d.y0,d.y1,d.x0,d.x1]; if(q1<c0||q0>c1)return;
+    const ns=[];segs.forEach(([s,e])=>{if(p1<=s||p0>=e){ns.push([s,e]);return;} if(p0>s)ns.push([s,p0]); if(p1<e)ns.push([p1,e]); if(!d.open)lint.push([Math.max(s,p0),Math.min(e,p1)]);}); segs=ns;});
+  return {segs,lint};}
+M.rooms.forEach(r=>{const deck=r.type==='deck',h=deck?1:H,t=deck?.08:T,col=deck?0x9a9489:0xf3f1ec;
+  [['x',r.x-t,r.x+r.w+t,r.y-t,r.y],['x',r.x-t,r.x+r.w+t,r.y+r.d,r.y+r.d+t],['z',r.y,r.y+r.d,r.x-t,r.x],['z',r.y,r.y+r.d,r.x+r.w,r.x+r.w+t]].forEach(([ax,a0,a1,c0,c1])=>{
+    const {segs,lint}=cut(a0,a1,ax,c0,c1);
+    segs.forEach(([s,e])=>{const w=ax==='x'?box(s,c0,e,c1,0,h,col):box(c0,s,c1,e,0,h,col); w.userData.h=h; walls.push(w);});
+    if(!deck) lint.forEach(([s,e])=>{const w=ax==='x'?box(s,c0,e,c1,2.1,H,col):box(c0,s,c1,e,2.1,H,col); w.userData.lint=1; walls.push(w);});});});
+function fur(f){const c=new THREE.Color(f.c),x0=f.x,z0=f.y,x1=f.x+f.w,z1=f.y+f.d;
+  if(f.kind==='bed_left'){box(x0,z0,x1,z1,0,.3,0x6b5644);box(x0+.05,z0+.05,x1-.02,z1-.05,.3,.5,c);box(x0,z0,x0+.08,z1,0,1,0x6b5644);box(x0+.12,z0+.12,x0+.45,z1-.12,.5,.62,0xffffff);return;}
+  if(f.kind.startsWith('sofa')){box(x0,z0,x1,z1,0,.42,c);const bz=f.kind==='sofa_up'?[z1-.25,z1]:[z0,z0+.25];
+    box(x0,bz[0],x1,bz[1],.42,.85,c.clone().multiplyScalar(.85));box(x0,z0,x0+.18,z1,.42,.62,c);box(x1-.18,z0,x1,z1,.42,.62,c);return;}
+  if(f.label.startsWith('Стол')&&f.h>.7){box(x0,z0,x1,z1,f.h-.04,f.h,c);[[x0,z0],[x1-.06,z0],[x0,z1-.06],[x1-.06,z1-.06]].forEach(([a,b])=>box(a,b,a+.06,b+.06,0,f.h-.04,0x5b4a3a));return;}
+  box(x0,z0,x1,z1,0,f.h,c,{r:.6});}
+M.furn.forEach(fur);
+// камера: плавный перелёт
+let fly=null;
+function goTo(pos,tgt){fly={p0:cam.position.clone(),t0:ctl.target.clone(),p1:pos,t1:tgt,k:0};}
+function fitDist(){const t=Math.tan(cam.fov*Math.PI/360);return Math.max((maxy-miny)/2,(maxx-minx)/2/cam.aspect)/t*1.1;}
+function setOn(el){document.querySelectorAll('#top button,#rooms button').forEach(b=>{if(b.id!=='blab'&&b.id!=='bwall')b.classList.toggle('on',b===el)});}
+function viewAll(){setOn(b3d);const D=fitDist(),dir=new THREE.Vector3(-.4,.78,.48).normalize();goTo(new THREE.Vector3(cx+dir.x*D,dir.y*D,cz+dir.z*D),new THREE.Vector3(cx,0,cz));}
+function viewTop(){setOn(btop);goTo(new THREE.Vector3(cx,fitDist()+2.6,cz+.01),new THREE.Vector3(cx,0,cz));}
+function viewRoom(r,btn){setOn(btn);const c=new THREE.Vector3(r.x+r.w/2,0,r.y+r.d/2);const t=Math.tan(cam.fov*Math.PI/360),D=Math.max(r.d,r.w/cam.aspect)/2/t*1.7+2.8;
+  const dir=new THREE.Vector3(-.35,.86,.38).normalize();goTo(c.clone().add(dir.multiplyScalar(D)),c);}
+const b3d=document.getElementById('b3d'),btop=document.getElementById('btop');
+b3d.onclick=viewAll; btop.onclick=viewTop;
+let low=false;document.getElementById('bwall').onclick=e=>{low=!low;e.target.textContent=low?'Стены выше':'Стены ниже';e.target.classList.toggle('on',low);
+  walls.forEach(w=>{if(w.userData.lint){w.visible=!low;return;} if(w.userData.h===H){w.scale.y=low?.4:1;w.position.y=(low?.4*H:H)/2;}});};
+let showL=true;const lbl=document.getElementById('lbl');document.getElementById('blab').onclick=e=>{showL=!showL;e.target.classList.toggle('on',showL);lbl.hidden=!showL;};
+const rooms=document.getElementById('rooms'),L=[];
+const all=document.createElement('button');all.textContent='Вся квартира';all.onclick=viewAll;rooms.appendChild(all);
+M.rooms.forEach(r=>{const b=document.createElement('button');b.textContent=r.name;b.onclick=()=>viewRoom(r,b);rooms.appendChild(b);
+  const d=document.createElement('div');d.className='t';d.innerHTML=r.name+'<span>'+AREA[r.name]+'</span>';d.onclick=()=>viewRoom(r,b);lbl.appendChild(d);
+  L.push([d,new THREE.Vector3(r.x+r.w/2,1.3,r.y+r.d/2)]);});
+function resize(){const w=app.clientWidth,h=app.clientHeight;renderer.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+{const D=fitDist(),dir=new THREE.Vector3(-.4,.78,.48).normalize();cam.position.set(cx+dir.x*D,dir.y*D,cz+dir.z*D);ctl.target.set(cx,0,cz);ctl.update();}
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches, v=new THREE.Vector3();
+(function loop(){requestAnimationFrame(loop);
+  if(fly){fly.k=Math.min(1,fly.k+(reduce?1:.045));const e=1-Math.pow(1-fly.k,3);cam.position.lerpVectors(fly.p0,fly.p1,e);ctl.target.lerpVectors(fly.t0,fly.t1,e);if(fly.k>=1)fly=null;}
+  ctl.update();renderer.render(scene,cam);
+  const w=app.clientWidth,h=app.clientHeight;
+  L.forEach(([d,p])=>{v.copy(p).project(cam);const vis=v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;d.hidden=!vis;d.style.left=((v.x+1)/2*w)+'px';d.style.top=((1-v.y)/2*h)+'px';});
+})();
+</script>
+</body></html>
