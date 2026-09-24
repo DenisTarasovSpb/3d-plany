@@ -713,7 +713,7 @@ M.furn.forEach(fur);
 // камера: плавный перелёт
 let fly=null;
 function goTo(pos,tgt){fly={p0:cam.position.clone(),t0:ctl.target.clone(),p1:pos,t1:tgt,k:0};}
-function fitDist(){const t=Math.tan(cam.fov*Math.PI/360);return Math.max((maxy-miny)/2,(maxx-minx)/2/cam.aspect)/t*1.1;}
+function fitDist(){const t=Math.tan(cam.fov*Math.PI/360);return Math.max((maxy-miny)/2,(maxx-minx)/2/cam.aspect)/t*1.35;}
 function setOn(el){document.querySelectorAll('#top button,#rooms button').forEach(b=>{if(b.id!=='blab'&&b.id!=='bwall')b.classList.toggle('on',b===el)});}
 function viewAll(){setOn(b3d);const D=fitDist(),dir=new THREE.Vector3(-.4,.78,.48).normalize();goTo(new THREE.Vector3(cx+dir.x*D,dir.y*D,cz+dir.z*D),new THREE.Vector3(cx,0,cz));}
 function viewTop(){setOn(btop);goTo(new THREE.Vector3(cx,fitDist()+2.6,cz+.01),new THREE.Vector3(cx,0,cz));}
