@@ -3,7 +3,7 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Кладовки: продано и в продаже</title>
 <meta property="og:title" content="Кладовки: продано и в продаже">
-<meta property="og:description" content="Отметки по 16 кладовкам: когда куплена, когда и за сколько продана, какие ещё в продаже.">
+<meta property="og:description" content="Отметки по 17 кладовкам: когда куплена, когда и за сколько продана, какие ещё в продаже.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -110,7 +110,7 @@ textarea.inp{min-height:62px;resize:vertical;font-weight:500}
 </style></head>
 <body>
 <header class="hero"><div class="wrap">
-  <div class="eyebrow">Кладовки · 16 помещений</div>
+  <div class="eyebrow">Кладовки · 17 помещений</div>
   <h1>Что продано, а что ещё в продаже</h1>
   <p class="lead">Анна Викторовна, по каждой кладовке достаточно трёх отметок: когда и за сколько куплена, продана или нет, и если продана, то когда и за сколько.</p>
   <ol class="steps">
@@ -163,7 +163,9 @@ textarea.inp{min-height:62px;resize:vertical;font-weight:500}
 const SHEET_API = "";
 
 const UNITS = [
-  {n:6, city:"Кудрово", zhk:"«Аквилон Stories»", addr:"Солнечная ул., 10 к1", pom:"114Н", area:5.1, floor:"подвал", est:775317},
+  {n:17,city:"Кудрово", zhk:"«Аквилон Stories»", addr:"Солнечная ул., 10 к1", pom:"150Н", area:0, floor:"", est:0, tag:"смотрели с Сергеем",
+   estNote:"Ориентир рынка в этом доме (Авито, июнь 2026): около <b>149 000 ₽ за кв. м</b>"},
+  {n:6,city:"Кудрово", zhk:"«Аквилон Stories»", addr:"Солнечная ул., 10 к1", pom:"114Н", area:5.1, floor:"подвал", est:775317},
   {n:12,city:"Кудрово", zhk:"«Аквилон Stories»", addr:"Солнечная ул., 10 к1", pom:"194Н", area:2.7, floor:"подвал", est:410462},
   {n:1, city:"Самара", zhk:"«Центральный»", addr:"Московское ш., 29", pom:"н88", area:4.3, floor:"24 этаж", est:418123},
   {n:5, city:"Самара", zhk:"«Центральный»", addr:"Московское ш., 29", pom:"н107", area:4.3, floor:"20 этаж", est:418123},
@@ -269,11 +271,11 @@ function calcHTML(u) {
 function card(u) {
   const d = S[u.n] || {}, st = d.st || "";
   const badge = st === "sold" ? "Продана" : st === "sale" ? "В продаже" : "Не отмечена";
-  const sub = [u.addr, areaTxt(u.area), u.floor].filter(Boolean).join(" · ");
-  const est = u.est ? `Оценка рынка (июнь 2026): <b>${rub(u.est)}</b>` : `Оценки рынка нет: в июне в этом доме кладовки не продавали`;
+  const sub = [u.addr, u.area ? areaTxt(u.area) : "", u.floor].filter(Boolean).join(" · ");
+  const est = u.estNote ? u.estNote : u.est ?`Оценка рынка (июнь 2026): <b>${rub(u.est)}</b>` : `Оценки рынка нет: в июне в этом доме кладовки не продавали`;
   const c = calcHTML(u);
   return `<article class="card ${st}" data-n="${u.n}">
-    <div class="ch"><div class="ct"><b>${u.zhk === u.addr ? "" : u.zhk + ", "}кладовка ${u.pom}</b><span>${sub}</span></div><span class="badge">${badge}</span></div>
+    <div class="ch"><div class="ct"><b>${u.zhk === u.addr ? "" : u.zhk + ", "}кладовка ${u.pom}${u.tag ? ` (${u.tag})` : ""}</b><span>${sub}</span></div><span class="badge">${badge}</span></div>
     <div class="est">${est}</div>
     <div class="seg">
       <button type="button" class="bs" data-st="sold" aria-pressed="${st === "sold"}"><i>${st === "sold" ? "✓" : ""}</i>Продана</button>
@@ -291,8 +293,8 @@ function card(u) {
         <label>Сумма продажи, ₽<input class="inp" inputmode="numeric" placeholder="например, 480 000" data-k="sell" data-m="1" value="${fmtIn(d.sell)}"></label>
       </div><div class="hint" data-h="sell"></div>
     </div>
-    <div class="grp" ${st === "sale" ? "" : "hidden"}><h3>Продажа сейчас</h3>
-      <label>За сколько готовы продать, ₽ (если уже решили)<input class="inp" inputmode="numeric" placeholder="можно оставить пустым" data-k="ask" data-m="1" value="${fmtIn(d.ask)}"></label>
+    <div class="grp" ${st === "sale" || (u.tag && st !== "sold") ? "" : "hidden"}><h3>Продажа сейчас</h3>
+      <label>${u.tag ? "За сколько планируете продавать, ₽" : "За сколько готовы продать, ₽ (если уже решили)"}<input class="inp" inputmode="numeric" placeholder="можно оставить пустым" data-k="ask" data-m="1" value="${fmtIn(d.ask)}"></label>
       <label class="tog"><input type="checkbox" data-k="rented" ${d.rented ? "checked" : ""}>Сейчас сдаётся в аренду</label>
       <label ${d.rented ? "" : "hidden"} data-rent>Аренда, ₽ в месяц<input class="inp" inputmode="numeric" placeholder="например, 3 500" data-k="rent" data-m="1" value="${fmtIn(d.rent)}"></label>
     </div>
@@ -367,12 +369,12 @@ function report() {
   UNITS.forEach(u => {
     const d = S[u.n] || {};
     if (u.city !== city) { city = u.city; L.push("", city.toUpperCase()); }
-    const head = `• ${u.addr}, кладовка ${u.pom}, ${areaTxt(u.area)}`;
+    const head = `• ${u.addr}, кладовка ${u.pom}` + (u.tag ? ` (${u.tag})` : "") + (u.area ? `, ${areaTxt(u.area)}` : "");
     const buy = d.buy || d.buyDate ? `куплена ${d.buyDate ? dmy(d.buyDate) : "(дата не указана)"} за ${d.buy ? rub(d.buy) : "(сумма не указана)"}` : "покупка не указана";
     let line;
     if (d.st === "sold") line = `ПРОДАНА ${d.sellDate ? dmy(d.sellDate) : "(дата не указана)"} за ${d.sell ? rub(d.sell) : "(сумма не указана)"}; ${buy}`;
     else if (d.st === "sale") line = `В ПРОДАЖЕ; ${buy}` + (d.ask ? `; готовы продать за ${rub(d.ask)}` : "") + (d.rented ? `; сдаётся${d.rent ? " за " + rub(d.rent) + " в месяц" : ""}` : "");
-    else line = "не отмечена" + (d.buy || d.buyDate ? `; ${buy}` : "");
+    else line = "не отмечена" + (d.buy || d.buyDate ? `; ${buy}` : "") + (d.ask ? `; планируют продавать за ${rub(d.ask)}` : "");
     L.push(`${head} — ${line}` + (d.note ? `. Комментарий: ${d.note}` : ""));
   });
   return L.join("\n");
