@@ -1,0 +1,397 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Кладовки: продано и в продаже</title>
+<meta property="og:title" content="Кладовки: продано и в продаже">
+<meta property="og:description" content="Отметки по 16 кладовкам: когда куплена, когда и за сколько продана, какие ещё в продаже.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#294D9D;--blue2:#3D59A5;--ink:#2B2B2B;--muted:#7E8794;--line:#D8DEEC;--fill:#E7EBF4;
+  --bg:#F3F5FA;--card:#fff;--green:#1E9E6A;--green-bg:#E8F6EF;--amber:#C98A0A;--red:#D9483B;
+  --r:18px;color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Manrope,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:96px}
+.wrap{max-width:860px;margin:0 auto;padding:0 16px}
+button,input,textarea{font:inherit;color:inherit}
+/* hero */
+.hero{background:radial-gradient(120% 140% at 100% 0%,#4A6BC0 0%,var(--blue) 45%,#1F3C80 100%);color:#fff;padding:18px 0 22px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;border:38px solid rgba(255,255,255,.06)}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#C9D3EC;font-weight:700}
+h1{margin:6px 0 8px;font-size:26px;line-height:1.12;font-weight:800;letter-spacing:-.01em}
+.lead{margin:0;color:#DCE3F4;max-width:620px;font-size:14.5px}
+.steps{display:grid;gap:6px;margin:14px 0 0;padding:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:#E8EDF8}
+.steps li:before{content:counter(s);flex:none;width:21px;height:21px;border-radius:50%;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:12px;font-weight:800}
+/* summary */
+section{margin-top:18px}
+h2{font-size:18px;margin:0 0 10px;font-weight:800}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.prog{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-weight:700}
+.prog b{font-size:20px}
+.bar{height:8px;border-radius:99px;background:var(--fill);margin-top:8px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.bar .s{background:var(--green)}.bar .f{background:var(--blue2)}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.tile{background:var(--bg);border-radius:14px;padding:10px 12px;min-width:0}
+.tile small{display:block;color:var(--muted);font-size:12px;font-weight:700}
+.tile b{display:block;font-size:18px;font-weight:800;margin-top:2px;overflow-wrap:anywhere}
+.tile span{display:block;font-size:12px;color:var(--muted)}
+.tile.g b{color:var(--green)}
+/* filters */
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:#fff;padding:7px 12px;border-radius:99px;font-weight:700;font-size:13.5px;cursor:pointer}
+.chip em{font-style:normal;font-size:11.5px;font-weight:800;background:var(--fill);padding:1px 7px;border-radius:99px}
+.chip[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.chip[aria-pressed="true"] em{background:rgba(255,255,255,.22)}
+/* cards */
+.city{margin:18px 0 8px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:10px;transition:border-color .2s,box-shadow .2s}
+.card.sold{border-color:#9ED6BC;background:linear-gradient(180deg,var(--green-bg),#fff 90px)}
+.card.sale{border-color:#B9C7E8}
+.ch{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.ct b{display:block;font-size:16.5px;font-weight:800;line-height:1.25}
+.ct span{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.badge{flex:none;font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;background:var(--fill);color:var(--muted);white-space:nowrap}
+.sold .badge{background:var(--green);color:#fff}
+.sale .badge{background:var(--blue);color:#fff}
+.est{margin-top:8px;font-size:12.5px;color:var(--muted)}
+.est b{color:var(--ink);font-weight:700}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
+.seg button{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:11px 8px;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+.seg button i{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);display:inline-grid;place-items:center;font-style:normal;font-size:11px;line-height:1}
+.seg .bs[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
+.seg .bf[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.seg button[aria-pressed="true"] i{border-color:#fff;background:#fff;color:var(--ink)}
+.grp{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.grp h3{margin:0 0 6px;font-size:13px;font-weight:800;color:var(--blue)}
+.sold .grp.sl h3{color:var(--green)}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+label{display:block;font-size:12px;font-weight:700;color:var(--muted)}
+.inp{display:block;width:100%;margin-top:3px;border:1.5px solid var(--line);border-radius:11px;padding:10px 11px;background:#fff;font-size:15.5px;font-weight:600;min-height:44px;-webkit-appearance:none;appearance:none}
+.inp:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 3px rgba(61,89,165,.15)}
+textarea.inp{min-height:62px;resize:vertical;font-weight:500}
+.hint{font-size:11.5px;color:var(--amber);font-weight:700;margin-top:3px;min-height:0}
+.calc{margin-top:10px;background:var(--bg);border-radius:12px;padding:9px 11px;font-size:13.5px;line-height:1.4}
+.calc b{font-weight:800}
+.calc .up{color:var(--green)}.calc .dn{color:var(--red)}
+.tog{display:flex;align-items:center;gap:9px;margin-top:10px;font-size:14px;font-weight:700;cursor:pointer;color:var(--ink)}
+.tog input{width:20px;height:20px;accent-color:var(--blue)}
+.foot{display:flex;justify-content:flex-end;margin-top:8px}
+.clr{border:0;background:none;color:var(--muted);font-size:12.5px;font-weight:700;cursor:pointer;padding:4px 0;text-decoration:underline}
+[hidden]{display:none!important}
+.empty{color:var(--muted);text-align:center;padding:20px 0}
+.note{font-size:12.5px;color:var(--muted);margin:14px 0 0}
+/* bottom bar */
+.dock{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
+.dock .wrap{display:flex;align-items:center;gap:10px;padding:0}
+.st{flex:1;min-width:0;font-size:12.5px;color:var(--muted);font-weight:700;line-height:1.3}
+.st b{color:var(--green)}
+.send{flex:none;border:0;background:var(--blue);color:#fff;font-weight:800;font-size:15px;padding:12px 18px;border-radius:13px;cursor:pointer;box-shadow:0 6px 16px rgba(41,77,157,.3)}
+/* sheet */
+.modal{position:fixed;inset:0;background:rgba(20,30,60,.45);display:flex;align-items:flex-end;justify-content:center;z-index:9;padding:0}
+.box{background:#fff;width:100%;max-width:620px;border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));max-height:86vh;display:flex;flex-direction:column}
+.box h3{margin:0 0 6px;font-size:17px}
+.box p{margin:0 0 10px;font-size:13.5px;color:var(--muted)}
+.box textarea{flex:1;min-height:200px;width:100%;border:1.5px solid var(--line);border-radius:12px;padding:10px;font-size:13px;line-height:1.4}
+.box .btns{display:flex;gap:8px;margin-top:10px}
+.box .btns button{flex:1;border:0;border-radius:12px;padding:12px;font-weight:800;cursor:pointer}
+.b1{background:var(--blue);color:#fff}.b2{background:var(--fill);color:var(--blue)}
+.toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%);background:#1F2A44;color:#fff;padding:10px 16px;border-radius:12px;font-size:13.5px;font-weight:700;z-index:10;max-width:calc(100% - 32px);text-align:center}
+@media (min-width:700px){
+  h1{font-size:32px}
+  .tiles{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .modal{align-items:center}.box{border-radius:20px}
+}
+</style></head>
+<body>
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Кладовки · 16 помещений</div>
+  <h1>Что продано, а что ещё в продаже</h1>
+  <p class="lead">Анна Викторовна, по каждой кладовке достаточно трёх отметок: когда и за сколько куплена, продана или нет, и если продана, то когда и за сколько.</p>
+  <ol class="steps">
+    <li>Нажмите «Продана» или «В продаже».</li>
+    <li>Впишите даты и суммы, которые помните. Пустые поля можно оставить.</li>
+    <li>В конце нажмите «Отправить Денису» внизу экрана.</li>
+  </ol>
+</div></header>
+
+<main class="wrap">
+  <section>
+    <div class="panel">
+      <div class="prog"><span>Отмечено</span><b id="pDone">0 из 16</b></div>
+      <div class="bar"><i class="s" id="barS"></i><i class="f" id="barF"></i></div>
+      <div class="tiles">
+        <div class="tile"><small>Продано</small><b id="tSold">0</b><span id="tSoldSum">—</span></div>
+        <div class="tile g"><small>Прибыль по проданным</small><b id="tProfit">—</b><span id="tProfitNote">нужны цены покупки и продажи</span></div>
+        <div class="tile"><small>В продаже</small><b id="tSale">0</b><span id="tSaleSum">—</span></div>
+        <div class="tile"><small>Вложено во все</small><b id="tBuy">—</b><span id="tBuyNote">по вписанным ценам покупки</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <div id="list"></div>
+  <p class="empty" id="empty" hidden>В этом фильтре кладовок нет.</p>
+
+  <p class="note">Оценка рынка в карточках посчитана по объявлениям Авито в тех же домах за июнь 2026 года; это ориентир, а не цена сделки. Кадастровые номера на странице не показаны.</p>
+</main>
+
+<div class="dock"><div class="wrap">
+  <div class="st" id="st">Отметки сохраняются на этом устройстве.</div>
+  <button class="send" id="send" type="button">Отправить Денису</button>
+</div></div>
+
+<div class="modal" id="modal" hidden>
+  <div class="box" role="dialog" aria-modal="true" aria-labelledby="mt">
+    <h3 id="mt">Текст для Дениса</h3>
+    <p id="mp">Текст уже скопирован. Вставьте его в переписку с Денисом в MAX или WhatsApp.</p>
+    <textarea id="mtext" readonly></textarea>
+    <div class="btns"><button class="b2" id="mcopy" type="button">Скопировать ещё раз</button><button class="b1" id="mclose" type="button">Готово</button></div>
+  </div>
+</div>
+
+<script>
+/* Адрес приёма отметок в Google-таблицу (Apps Script). Пусто — отметки хранятся только на устройстве. */
+const SHEET_API = "";
+
+const UNITS = [
+  {n:6, city:"Кудрово", zhk:"«Аквилон Stories»", addr:"Солнечная ул., 10 к1", pom:"114Н", area:5.1, floor:"подвал", est:775317},
+  {n:12,city:"Кудрово", zhk:"«Аквилон Stories»", addr:"Солнечная ул., 10 к1", pom:"194Н", area:2.7, floor:"подвал", est:410462},
+  {n:1, city:"Самара", zhk:"«Центральный»", addr:"Московское ш., 29", pom:"н88", area:4.3, floor:"24 этаж", est:418123},
+  {n:5, city:"Самара", zhk:"«Центральный»", addr:"Московское ш., 29", pom:"н107", area:4.3, floor:"20 этаж", est:418123},
+  {n:7, city:"Самара", zhk:"«Центральный»", addr:"Московское ш., 29", pom:"н110", area:4.3, floor:"23 этаж", est:418123},
+  {n:2, city:"Новосибирск", zhk:"«Расцветай на Красном»", addr:"Красный пр., 167/3", pom:"138", area:2.9, floor:"", est:324794},
+  {n:8, city:"Новосибирск", zhk:"«Расцветай на Красном»", addr:"Красный пр., 167/3", pom:"141", area:3.0, floor:"", est:335994},
+  {n:3, city:"Калининград", zhk:"«Уютный»", addr:"Иркутская ул., 8", pom:"34к", area:3.5, floor:"1 этаж", est:235417},
+  {n:13,city:"Калининград", zhk:"«Уютный»", addr:"Иркутская ул., 8", pom:"42к", area:2.7, floor:"1 этаж", est:181607},
+  {n:4, city:"Краснодар", zhk:"Западный Обход, 57 к2", addr:"ул. Западный Обход, 57 к2", pom:"38", area:4.9, floor:"", est:250483},
+  {n:11,city:"Краснодар", zhk:"Западный Обход, 57 к2", addr:"ул. Западный Обход, 57 к2", pom:"73", area:4.6, floor:"", est:235147},
+  {n:9, city:"Уфа", zhk:"«Сосны»", addr:"Артезианская ул., 7", pom:"49к", area:3.7, floor:"", est:144574},
+  {n:10,city:"Уфа", zhk:"«Сосны»", addr:"Артезианская ул., 7", pom:"133к", area:3.3, floor:"", est:128944},
+  {n:14,city:"Уфа", zhk:"«Сосны»", addr:"Артезианская ул., 7", pom:"39к", area:4.2, floor:"", est:164111},
+  {n:15,city:"Казань", zhk:"«Нестеровский»", addr:"ул. Вишневского, 57А", pom:"1038", area:3.9, floor:"2 этаж", est:372590},
+  {n:16,city:"Тюмень", zhk:"«Озёрный парк»", addr:"Полевая ул., 117 к3", pom:"120", area:5.6, floor:"подвал", est:0}
+];
+const KEY = "kladovki-uchet-v1";
+const $ = s => document.querySelector(s);
+let S = {};
+try { S = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { S = {}; }
+let filter = "all";
+
+const rub = v => Math.round(v).toLocaleString("ru-RU").replace(/,/g, " ") + " ₽";
+const num = s => { const d = String(s || "").replace(/[^\d]/g, ""); return d ? +d : 0; };
+const fmtIn = v => v ? Math.round(v).toLocaleString("ru-RU") : "";
+const dmy = iso => { if (!iso) return ""; const [y, m, d] = iso.split("-"); return `${d}.${m}.${y}`; };
+const areaTxt = a => String(a).replace(".", ",") + " м²";
+const get = n => (S[n] = S[n] || {});
+function span(a, b) {
+  const d1 = new Date(a), d2 = new Date(b); if (isNaN(d1) || isNaN(d2) || d2 <= d1) return null;
+  let m = (d2.getFullYear() - d1.getFullYear()) * 12 + (d2.getMonth() - d1.getMonth()); if (d2.getDate() < d1.getDate()) m--;
+  const days = (d2 - d1) / 864e5, y = Math.floor(m / 12), mm = m % 12;
+  const yw = y ? y + " " + (y % 10 === 1 && y % 100 !== 11 ? "год" : (y % 10 >= 2 && y % 10 <= 4 && (y % 100 < 10 || y % 100 >= 20) ? "года" : "лет")) : "";
+  const mw = mm ? mm + " мес." : "";
+  return { days, txt: [yw, mw].filter(Boolean).join(" ") || "меньше месяца" };
+}
+function save(n) {
+  if (n != null) get(n).ts = Date.now();
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+  if (n != null) push(n);
+  status();
+}
+/* ---------- Google-таблица ---------- */
+let pending = {}, timer = null, remoteOk = null;
+function push(n) {
+  if (!SHEET_API) return;
+  pending[n] = true; clearTimeout(timer);
+  $("#st").textContent = "Сохраняю в таблицу…";
+  timer = setTimeout(flush, 1200);
+}
+async function flush() {
+  const ns = Object.keys(pending); pending = {};
+  try {
+    for (const n of ns) {
+      const u = UNITS.find(x => x.n == n);
+      await fetch(SHEET_API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ n: +n, label: `${u.city}, ${u.pom}`, data: S[n] || {} }) });
+    }
+    remoteOk = true;
+  } catch (e) { remoteOk = false; ns.forEach(n => pending[n] = true); }
+  status();
+}
+async function pull() {
+  if (!SHEET_API) return;
+  try {
+    const r = await fetch(SHEET_API + "?t=" + Date.now()); const all = await r.json();
+    Object.keys(all || {}).forEach(n => { const rem = all[n]; if (rem && (!S[n] || (rem.ts || 0) > (S[n].ts || 0))) S[n] = rem; });
+    try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+    remoteOk = true; render();
+  } catch (e) { remoteOk = false; status(); }
+}
+function status() {
+  const el = $("#st");
+  if (!SHEET_API) { el.innerHTML = "Отметки сохраняются на этом устройстве. Чтобы они дошли до Дениса, нажмите кнопку справа."; return; }
+  if (Object.keys(pending).length) { el.textContent = "Сохраняю в таблицу…"; return; }
+  el.innerHTML = remoteOk === false ? "Нет связи с таблицей: отметки сохранены на устройстве, попробую ещё раз." : "<b>✓</b> Отметки сохраняются в таблицу Дениса автоматически.";
+}
+/* ---------- карточки ---------- */
+function stateOf(n) { return (S[n] || {}).st || ""; }
+function chips() {
+  const c = { all: UNITS.length, none: 0, sold: 0, sale: 0 };
+  UNITS.forEach(u => { const s = stateOf(u.n); c[s || "none"]++; });
+  const items = [["all", "Все"], ["none", "Не отмечены"], ["sold", "Продано"], ["sale", "В продаже"]];
+  $("#chips").innerHTML = items.map(([k, t]) => `<button class="chip" type="button" data-f="${k}" aria-pressed="${filter === k}">${t}<em>${c[k]}</em></button>`).join("");
+}
+function calcHTML(u) {
+  const d = S[u.n] || {}, buy = d.buy || 0;
+  if (d.st === "sold" && buy && d.sell) {
+    const p = d.sell - buy, pct = p / buy * 100, sp = span(d.buyDate, d.sellDate);
+    let t = `${p >= 0 ? "Прибыль" : "Убыток"} <b class="${p >= 0 ? "up" : "dn"}">${rub(Math.abs(p))}</b> · <b class="${p >= 0 ? "up" : "dn"}">${p >= 0 ? "+" : "−"}${Math.abs(pct).toFixed(1).replace(".", ",")}%</b>`;
+    if (sp) t += ` за ${sp.txt}` + (sp.days >= 60 ? ` · ≈ ${(pct / (sp.days / 365)).toFixed(1).replace(".", ",")}% годовых` : "");
+    return t;
+  }
+  if (d.st === "sale" && buy && u.est) {
+    const g = (u.est / buy - 1) * 100;
+    return `По оценке рынка кладовка стоит около <b>${rub(u.est)}</b>: это <b class="${g >= 0 ? "up" : "dn"}">${g >= 0 ? "+" : "−"}${Math.abs(g).toFixed(0)}%</b> к цене покупки.`;
+  }
+  if (d.st === "sale" && d.rented && d.rent && buy) {
+    return `Аренда приносит <b>${(d.rent * 12 / buy * 100).toFixed(1).replace(".", ",")}%</b> годовых к цене покупки.`;
+  }
+  return "";
+}
+function card(u) {
+  const d = S[u.n] || {}, st = d.st || "";
+  const badge = st === "sold" ? "Продана" : st === "sale" ? "В продаже" : "Не отмечена";
+  const sub = [u.addr, areaTxt(u.area), u.floor].filter(Boolean).join(" · ");
+  const est = u.est ? `Оценка рынка (июнь 2026): <b>${rub(u.est)}</b>` : `Оценки рынка нет: в июне в этом доме кладовки не продавали`;
+  const c = calcHTML(u);
+  return `<article class="card ${st}" data-n="${u.n}">
+    <div class="ch"><div class="ct"><b>${u.zhk === u.addr ? "" : u.zhk + ", "}кладовка ${u.pom}</b><span>${sub}</span></div><span class="badge">${badge}</span></div>
+    <div class="est">${est}</div>
+    <div class="seg">
+      <button type="button" class="bs" data-st="sold" aria-pressed="${st === "sold"}"><i>${st === "sold" ? "✓" : ""}</i>Продана</button>
+      <button type="button" class="bf" data-st="sale" aria-pressed="${st === "sale"}"><i>${st === "sale" ? "✓" : ""}</i>В продаже</button>
+    </div>
+    <div class="grp"><h3>Покупка</h3>
+      <div class="row">
+        <label>Дата покупки<input class="inp" type="date" data-k="buyDate" value="${d.buyDate || ""}"></label>
+        <label>Сумма покупки, ₽<input class="inp" inputmode="numeric" placeholder="например, 350 000" data-k="buy" data-m="1" value="${fmtIn(d.buy)}"></label>
+      </div><div class="hint" data-h="buy"></div>
+    </div>
+    <div class="grp sl" ${st === "sold" ? "" : "hidden"}><h3>Продажа</h3>
+      <div class="row">
+        <label>Дата продажи<input class="inp" type="date" data-k="sellDate" value="${d.sellDate || ""}"></label>
+        <label>Сумма продажи, ₽<input class="inp" inputmode="numeric" placeholder="например, 480 000" data-k="sell" data-m="1" value="${fmtIn(d.sell)}"></label>
+      </div><div class="hint" data-h="sell"></div>
+    </div>
+    <div class="grp" ${st === "sale" ? "" : "hidden"}><h3>Продажа сейчас</h3>
+      <label>За сколько готовы продать, ₽ (если уже решили)<input class="inp" inputmode="numeric" placeholder="можно оставить пустым" data-k="ask" data-m="1" value="${fmtIn(d.ask)}"></label>
+      <label class="tog"><input type="checkbox" data-k="rented" ${d.rented ? "checked" : ""}>Сейчас сдаётся в аренду</label>
+      <label ${d.rented ? "" : "hidden"} data-rent>Аренда, ₽ в месяц<input class="inp" inputmode="numeric" placeholder="например, 3 500" data-k="rent" data-m="1" value="${fmtIn(d.rent)}"></label>
+    </div>
+    <div class="grp"><label>Комментарий<textarea class="inp" data-k="note" placeholder="например: продавали через Авито, покупатель — сосед по дому">${(d.note || "").replace(/</g, "&lt;")}</textarea></label></div>
+    <div class="calc" ${c ? "" : "hidden"}>${c}</div>
+    <div class="foot"><button class="clr" type="button" data-clr>Очистить отметки</button></div>
+  </article>`;
+}
+function render() {
+  chips();
+  const list = UNITS.filter(u => filter === "all" || (stateOf(u.n) || "none") === filter);
+  let html = "", city = "";
+  list.forEach(u => { if (u.city !== city) { city = u.city; html += `<div class="city">${city}</div>`; } html += card(u); });
+  $("#list").innerHTML = html; $("#empty").hidden = list.length > 0;
+  summary(); status();
+}
+function summary() {
+  let sold = 0, sale = 0, soldSum = 0, buySold = 0, prof = 0, profN = 0, buyAll = 0, buyN = 0, estSale = 0;
+  UNITS.forEach(u => {
+    const d = S[u.n] || {};
+    if (d.buy) { buyAll += d.buy; buyN++; }
+    if (d.st === "sold") { sold++; if (d.sell) soldSum += d.sell; if (d.sell && d.buy) { prof += d.sell - d.buy; buySold += d.buy; profN++; } }
+    if (d.st === "sale") { sale++; estSale += d.ask || u.est || 0; }
+  });
+  const done = sold + sale, N = UNITS.length;
+  $("#pDone").textContent = `${done} из ${N}`;
+  $("#barS").style.width = (sold / N * 100) + "%"; $("#barF").style.width = (sale / N * 100) + "%";
+  $("#tSold").textContent = sold; $("#tSoldSum").textContent = soldSum ? "на " + rub(soldSum) : "—";
+  $("#tSale").textContent = sale; $("#tSaleSum").textContent = estSale ? "≈ " + rub(estSale) + " по цене продажи или оценке" : "—";
+  $("#tProfit").textContent = profN ? (prof >= 0 ? "+" : "−") + rub(Math.abs(prof)) : "—";
+  $("#tProfitNote").textContent = profN ? `${(prof / buySold * 100).toFixed(1).replace(".", ",")}% к покупке · по ${profN} шт.` : "нужны цены покупки и продажи";
+  $("#tBuy").textContent = buyN ? rub(buyAll) : "—";
+  $("#tBuyNote").textContent = buyN ? `по ${buyN} из ${N} кладовок` : "по вписанным ценам покупки";
+}
+function refreshCard(el, n) {
+  const u = UNITS.find(x => x.n == n), c = calcHTML(u), box = el.querySelector(".calc");
+  box.innerHTML = c; box.hidden = !c; summary();
+}
+/* ---------- события ---------- */
+document.addEventListener("click", e => {
+  const ch = e.target.closest(".chip");
+  if (ch) { filter = ch.dataset.f; render(); return; }
+  const b = e.target.closest(".seg button");
+  if (b) {
+    const n = b.closest(".card").dataset.n, d = get(n);
+    d.st = d.st === b.dataset.st ? "" : b.dataset.st; save(n); render();
+    const el = document.querySelector(`.card[data-n="${n}"]`); if (el) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    return;
+  }
+  if (e.target.closest("[data-clr]")) {
+    const n = e.target.closest(".card").dataset.n;
+    if (confirm("Очистить все отметки по этой кладовке?")) { S[n] = {}; save(n); render(); }
+  }
+});
+document.addEventListener("input", e => {
+  const k = e.target.dataset.k; if (!k) return;
+  const el = e.target.closest(".card"), n = el.dataset.n, d = get(n);
+  if (k === "rented") { d.rented = e.target.checked; el.querySelector("[data-rent]").hidden = !d.rented; }
+  else if (e.target.dataset.m) {
+    d[k] = num(e.target.value);
+    const h = el.querySelector(`[data-h="${k}"]`);
+    if (h) h.textContent = d[k] && d[k] < 10000 ? `Проверьте сумму: сейчас ${rub(d[k])}. Если имелись в виду тысячи, допишите нули.` : "";
+  } else d[k] = e.target.value;
+  save(n); refreshCard(el, n);
+});
+document.addEventListener("focusout", e => { if (e.target.dataset && e.target.dataset.m) { const v = num(e.target.value); e.target.value = fmtIn(v); } });
+/* ---------- отправка ---------- */
+function report() {
+  const today = new Date().toLocaleDateString("ru-RU");
+  const L = [`Кладовки: отметки Анны Викторовны (${today})`];
+  let city = "";
+  UNITS.forEach(u => {
+    const d = S[u.n] || {};
+    if (u.city !== city) { city = u.city; L.push("", city.toUpperCase()); }
+    const head = `• ${u.addr}, кладовка ${u.pom}, ${areaTxt(u.area)}`;
+    const buy = d.buy || d.buyDate ? `куплена ${d.buyDate ? dmy(d.buyDate) : "(дата не указана)"} за ${d.buy ? rub(d.buy) : "(сумма не указана)"}` : "покупка не указана";
+    let line;
+    if (d.st === "sold") line = `ПРОДАНА ${d.sellDate ? dmy(d.sellDate) : "(дата не указана)"} за ${d.sell ? rub(d.sell) : "(сумма не указана)"}; ${buy}`;
+    else if (d.st === "sale") line = `В ПРОДАЖЕ; ${buy}` + (d.ask ? `; готовы продать за ${rub(d.ask)}` : "") + (d.rented ? `; сдаётся${d.rent ? " за " + rub(d.rent) + " в месяц" : ""}` : "");
+    else line = "не отмечена" + (d.buy || d.buyDate ? `; ${buy}` : "");
+    L.push(`${head} — ${line}` + (d.note ? `. Комментарий: ${d.note}` : ""));
+  });
+  return L.join("\n");
+}
+async function copy(t) { try { await navigator.clipboard.writeText(t); return true; } catch (e) { const ta = $("#mtext"); ta.focus(); ta.select(); try { return document.execCommand("copy"); } catch (x) { return false; } } }
+function toast(t) { const d = document.createElement("div"); d.className = "toast"; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 2600); }
+$("#send").addEventListener("click", async () => {
+  const t = report();
+  if (navigator.share && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    try { await navigator.share({ text: t }); return; } catch (e) { if (e && e.name === "AbortError") return; }
+  }
+  $("#mtext").value = t; $("#modal").hidden = false;
+  const ok = await copy(t);
+  $("#mp").textContent = ok ? "Текст уже скопирован. Вставьте его в переписку с Денисом в MAX или WhatsApp." : "Выделите текст и скопируйте его, затем вставьте в переписку с Денисом.";
+});
+$("#mcopy").addEventListener("click", async () => { toast(await copy($("#mtext").value) ? "Скопировано" : "Не получилось, выделите текст вручную"); });
+$("#mclose").addEventListener("click", () => { $("#modal").hidden = true; });
+$("#modal").addEventListener("click", e => { if (e.target.id === "modal") $("#modal").hidden = true; });
+
+render(); pull();
+</script>
+</body></html>
