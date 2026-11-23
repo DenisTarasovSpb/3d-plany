@@ -49,6 +49,19 @@
   setInterval(function(){ if (v.paused) v.play(); }, 10000);
   setTimeout(function(){ location.reload(); }, 6 * 60 * 60 * 1000);
 
+  // Новый ролик на сайте → страница перезагружается сама (проверка раз в 3 минуты)
+  var CUR = 'karusel_holl_v2.mp4';
+  function checkNew() {
+    fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.text() : ''; })
+      .then(function (t) {
+        t = (t || '').trim();
+        if (t && t !== CUR) location.replace(location.pathname + '?v=' + encodeURIComponent(t));
+      }).catch(function () {});
+  }
+  setInterval(checkNew, 3 * 60 * 1000);
+  setTimeout(checkNew, 20000);
+
   function say(t) { castMsg.textContent = t; castMsg.style.display = 'block'; }
 
   window.__onGCastApiAvailable = function (ok) {
