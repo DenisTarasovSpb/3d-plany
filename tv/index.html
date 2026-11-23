@@ -35,7 +35,15 @@
   }
   document.addEventListener('keydown', full);
   v.addEventListener('click', full);
-  setTimeout(function(){ hint.style.display = 'none'; }, 15000);
+  var PHONE = /Mobi|iPhone|iPad/i.test(navigator.userAgent);
+  if (PHONE) {
+    hint.style.cssText += ';font-size:20px;width:86vw;bottom:auto;top:20vh';
+    hint.innerHTML = /iPhone|iPad/i.test(navigator.userAgent)
+      ? 'С iPhone запуск не работает.<br>Нужен телефон Android с браузером Chrome.'
+      : 'Откройте эту страницу в браузере <b>Chrome</b>:<br>меню ⋮ → «Открыть в Chrome».<br>Там появится кнопка «Показать на телевизоре».';
+  } else {
+    setTimeout(function(){ hint.style.display = 'none'; }, 15000);
+  }
   v.addEventListener('ended', function(){ v.currentTime = 0; v.play(); });
   v.addEventListener('error', function(){ setTimeout(function(){ location.reload(); }, 30000); });
   setInterval(function(){ if (v.paused) v.play(); }, 10000);
