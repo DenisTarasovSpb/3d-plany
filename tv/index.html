@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Адвекс Юнит — объекты</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  video { position: fixed; inset: 0; width: 100vw; height: 100vh; object-fit: contain; background: #000; }
+  #hint { position: fixed; left: 50%; bottom: 6vh; transform: translateX(-50%); text-align: center;
+          font: 28px/1.3 sans-serif; color: #fff; background: rgba(41,77,157,.92);
+          padding: 14px 28px; border-radius: 10px; }
+  #cast { display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%);
+          font: 500 24px/1.3 sans-serif; color: #fff; background: #294D9D; border: 2px solid #fff;
+          border-radius: 14px; padding: 22px 30px; cursor: pointer; }
+  #castmsg { display: none; position: fixed; left: 0; right: 0; bottom: 4vh; text-align: center;
+             font: 20px/1.3 sans-serif; color: #fff; padding: 0 16px; }
+</style>
+</head>
+<body>
+<video id="v" src="karusel_holl_2026-11-23.mp4" autoplay muted loop playsinline preload="auto"></video>
+<div id="hint">Нажмите «ОК» на пульте — показ на весь экран</div>
+<button id="cast" type="button">Показать на телевизоре в холле</button>
+<div id="castmsg"></div>
+<script>
+  var v = document.getElementById('v'), hint = document.getElementById('hint');
+  var castBtn = document.getElementById('cast'), castMsg = document.getElementById('castmsg');
+  var VIDEO_URL = new URL('karusel_holl_2026-11-23.mp4', location.href).href;
+
+  function full() {
+    var el = document.documentElement;
+    try { (el.requestFullscreen || el.webkitRequestFullscreen || function(){}).call(el); } catch (e) {}
+    v.play();
+    hint.style.display = 'none';
+  }
+  document.addEventListener('keydown', full);
+  v.addEventListener('click', full);
+  setTimeout(function(){ hint.style.display = 'none'; }, 15000);
+  v.addEventListener('ended', function(){ v.currentTime = 0; v.play(); });
+  v.addEventListener('error', function(){ setTimeout(function(){ location.reload(); }, 30000); });
+  setInterval(function(){ if (v.paused) v.play(); }, 10000);
+  setTimeout(function(){ location.reload(); }, 6 * 60 * 60 * 1000);
+
+  function say(t) { castMsg.textContent = t; castMsg.style.display = 'block'; }
+
+  window.__onGCastApiAvailable = function (ok) {
+    if (!ok) return;
+    cast.framework.CastContext.getInstance().setOptions({
+      receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+      autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+    });
+    castBtn.style.display = 'block';
+    hint.style.display = 'none';
+  };
+
+  castBtn.addEventListener('click', function () {
+    var ctx = cast.framework.CastContext.getInstance();
+    ctx.requestSession().then(function () {
+      var s = ctx.getCurrentSession();
+      var mi = new chrome.cast.media.MediaInfo(VIDEO_URL, 'video/mp4');
+      mi.streamType = chrome.cast.media.StreamType.BUFFERED;
+      var md = new chrome.cast.media.GenericMediaMetadata(); md.title = 'Адвекс Юнит — объекты'; mi.metadata = md;
+      var req = new chrome.cast.media.LoadRequest(mi);
+      req.autoplay = true;
+      try {
+        var item = new chrome.cast.media.QueueItem(mi); item.autoplay = true;
+        var q = new chrome.cast.media.QueueData(); q.items = [item]; q.startIndex = 0;
+        q.repeatMode = chrome.cast.media.RepeatMode.SINGLE; req.queueData = q;
+      } catch (e) {}
+      return s.loadMedia(req).then(function () {
+        var m = s.getMediaSession();
+        if (m && m.queueSetRepeatMode) m.queueSetRepeatMode(chrome.cast.media.RepeatMode.SINGLE, function(){}, function(){});
+        castBtn.textContent = 'Идёт на телевизоре по кругу';
+        say('Готово. Телефон можно убрать — показ продолжится сам.');
+      });
+    }).catch(function (e) { say('Не получилось: телефон должен быть в Wi-Fi офиса. Нажмите ещё раз.'); });
+  });
+</script>
+<script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+</body>
+</html>
