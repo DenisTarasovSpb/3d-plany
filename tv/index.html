@@ -18,14 +18,14 @@
 </style>
 </head>
 <body>
-<video id="v" src="karusel_holl_v2.mp4" autoplay muted loop playsinline preload="auto"></video>
+<video id="v" src="karusel_holl_v3.mp4" autoplay muted loop playsinline preload="auto"></video>
 <div id="hint">Нажмите «ОК» на пульте — показ на весь экран</div>
 <button id="cast" type="button">Показать на телевизоре в холле</button>
 <div id="castmsg"></div>
 <script>
   var v = document.getElementById('v'), hint = document.getElementById('hint');
   var castBtn = document.getElementById('cast'), castMsg = document.getElementById('castmsg');
-  var VIDEO_URL = new URL('karusel_holl_v2.mp4', location.href).href;
+  var VIDEO_URL = new URL('karusel_holl_v3.mp4', location.href).href;
 
   function full() {
     var el = document.documentElement;
@@ -50,7 +50,7 @@
   setTimeout(function(){ location.reload(); }, 6 * 60 * 60 * 1000);
 
   // Новый ролик на сайте → страница перезагружается сама (проверка раз в 3 минуты)
-  var CUR = 'karusel_holl_v2.mp4';
+  var CUR = 'karusel_holl_v3.mp4';
   function checkNew() {
     fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.text() : ''; })
