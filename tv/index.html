@@ -59,7 +59,6 @@
       var s = ctx.getCurrentSession();
       var mi = new chrome.cast.media.MediaInfo(VIDEO_URL, 'video/mp4');
       mi.streamType = chrome.cast.media.StreamType.BUFFERED;
-      var md = new chrome.cast.media.GenericMediaMetadata(); md.title = 'Адвекс Юнит — объекты'; mi.metadata = md;
       var req = new chrome.cast.media.LoadRequest(mi);
       req.autoplay = true;
       try {
